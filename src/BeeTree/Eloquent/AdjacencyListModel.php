@@ -109,17 +109,21 @@ class AdjacencyListModel implements ModelInterface{
 
         $node->__set($this->parentCol(), NULL);
 
-        $id = $node->__get($this->pkCol());
+        $rootId = $node->__get($this->rootCol());
 
-        if($id){
-            $node->__set($this->rootCol(), $id);
+        if(!$rootId){
+            $rootId = $node->__get($this->pkCol());
+        }
+
+        if($rootId){
+            $node->__set($this->rootCol(), $rootId);
         }
 
         $node->save();
 
-        if(!$id){
-            $id = $node->__get($this->pkCol());
-            $node->__set($this->rootCol(), $id);
+        if(!$rootId){
+            $rootId = $node->__get($this->pkCol());
+            $node->__set($this->rootCol(), $rootId);
         }
 
         $node->__set($this->parentCol(), NULL);
