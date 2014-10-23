@@ -40,7 +40,7 @@ class AdjacencyListModel implements ModelInterface{
     protected $_selectColumns = NULL;
 
     public function nodeClassName(){
-        return $this->nodeClassName;
+        return $this->_nodeClassName;
     }
 
     public function setNodeClassName($className){
