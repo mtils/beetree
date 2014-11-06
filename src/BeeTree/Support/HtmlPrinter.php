@@ -20,32 +20,36 @@ class HtmlPrinter{
         return array_reverse($breadcrumbs);
     }
 
-    public function ul(NodeInterface $node, $titleProperty, $currentIdentifier='', &$string=NULL){
+    public function toJsTree(NodeInterface $node, $titleProperty, $currentIdentifier='', &$string=NULL){
 
         if($string === NULL){
             $string = '<ul>';
         }
 
-        $liClasses = array('jstree-open');
+        $liClasses = ['jstree-open'];
 
         if($node->isRootNode()){
             $liClasses[] = 'root-node';
         }
 
+        $spanClasses = [];
+
         if($currentIdentifier == $node->getIdentifier()){
-            $liClasses[] = 'active';
+            $spanClasses[] = 'active';
         }
 
-        $classes = implode(' ', $liClasses);
+        $liClass = implode(' ', $liClasses);
+        $spanClass = implode(' ', $spanClasses);
+
         $title = $node->$titleProperty;
         $id = $node->getIdentifier();
 
-        $string .= "\n    <li id=\"node-{$id}\" class=\"$classes\">{$title}";
+        $string .= "\n    <li id=\"node-{$id}\" class=\"$liClass\"><span class=\"$spanClass\">{$title}</span>";
 
         if(count($node->childNodes())){
             $string .= "\n    <ul>";
             foreach($node->childNodes() as $child){
-                $this->ul($child, $titleProperty, $currentIdentifier, $string);
+                $this->toJsTree($child, $titleProperty, $currentIdentifier, $string);
             }
             $string .= "\n    </ul>";
         }
