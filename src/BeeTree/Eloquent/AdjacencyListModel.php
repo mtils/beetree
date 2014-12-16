@@ -93,6 +93,15 @@ class AdjacencyListModel implements ModelInterface{
         return $this->_idLookup[$identifier];
     }
 
+    /**
+     * @brief Retrieve all root nodes
+     *
+     * @return \Traversable
+     **/
+    public function rootNodes(){
+        return $this->getRootNodesQuery()->get()->all();
+    }
+
     public function makeNode(){
         $node = $this->_nodeClassReflection->newInstance();
         foreach($this->_constraints as $key=>$value){
@@ -241,6 +250,31 @@ class AdjacencyListModel implements ModelInterface{
             $this->_rootCol = $properties['rootIdColumn'];
         }
         return $this->_rootCol;
+    }
+
+    protected function getRootNodesQuery(){
+
+        $table = $this->nodeTable();
+        $rootCol = $this->rootCol();
+
+        if(!$this->_constraints){
+            $query = call_user_func(array($this->_nodeClassName, 'orderBy'), "$table.$rootCol");
+        }
+        else{
+            $method = array($this->_nodeClassName, 'whereNested');
+            $constraints = $this->_constraints;
+            $where = call_user_func($method, function($query) use ($constraints){
+                foreach($constraints as $column=>$value){
+                    $query->where($column,'=',$value);
+                }
+            });
+            $query = $where->orderBy("$table.$rootCol");
+        }
+
+        $query = $query->whereNull($this->parentCol());
+
+        return $query;
+
     }
 
     protected function getHierarchyByRootIdQuery($rootId){

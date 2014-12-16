@@ -20,6 +20,13 @@ interface ModelInterface{
     public function get($identifier, $rootId=NULL);
 
     /**
+     * @brief Retrieve all root nodes
+     *
+     * @return \Traversable
+     **/
+    public function rootNodes();
+
+    /**
      * @brief Construct a node (new $NodeClass()) (Doesn't save the node)
      * 
      * @return NodeInterface
