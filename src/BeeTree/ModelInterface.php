@@ -1,48 +1,49 @@
 <?php namespace BeeTree;
 
-interface ModelInterface{
+interface ModelInterface
+{
 
     /**
-     * @brief Retrieve a tree by its rootId
+     * Retrieve a tree by its rootId
      * 
      * @param mixed $rootId The id of its root node, which is the same as node->getRootId()
-     * @return NodeInterface
+     * @return \BeeTree\NodeInterface
      **/
     public function tree($rootId=NULL);
 
     /**
-     * @brief Retrieve a tree by its _ID_
+     * Retrieve a tree by its ID
      * 
      * @param mixed $identifier The id of this node, which is the same as node->getIdentifier()
      * @param mixed $rootId The rootId of the tree, optional to speed up the initial query
-     * @return NodeInterface
+     * @return \BeeTree\NodeInterface
      **/
     public function get($identifier, $rootId=NULL);
 
     /**
-     * @brief Retrieve all root nodes
+     * Retrieve all root nodes
      *
      * @return \Traversable
      **/
     public function rootNodes();
 
     /**
-     * @brief Construct a node (new $NodeClass()) (Doesn't save the node)
+     * Construct a node (new $NodeClass()) (Doesn't save the node)
      * 
-     * @return NodeInterface
+     * @return \BeeTree\NodeInterface
      **/
     public function makeNode();
 
     /**
-     * @brief Save a node
+     * Save a node
      *
-     * @param NodeInterface $node The node you want to save
-     * @return ModelInterface For fluid syntax
+     * @param \BeeTree\NodeInterface $node The node you want to save
+     * @return \BeeTree\ModelInterface For fluid syntax
      **/
     public function saveNode(NodeInterface $node);
 
     /**
-     * @brief Mark a node as root AND save it
+     * Mark a node as root AND save it
      * 
      * @param NodeInterface $node The new root node
      * @return ModelInterface For fluid syntax
@@ -50,7 +51,7 @@ interface ModelInterface{
     public function makeRootNode(NodeInterface $node);
 
     /**
-     * @brief Make node $node a child of $newParent
+     * Make node $node a child of $newParent
      *        If this is an ordered tree, the position should be the last
      *
      * @param NodeInterface $node The moved or inserted node
@@ -61,7 +62,7 @@ interface ModelInterface{
                                 NodeInterface $newParent);
 
     /**
-     * @brief Delete the node. If the childnodes shouldnt be deleted, the
+     * Delete the node. If the childnodes shouldnt be deleted, the
      *        childNodes will wander one level up
      * 
      * @param NodeInterface $node The node you want to delete

@@ -1,11 +1,12 @@
 <?php namespace BeeTree\Eloquent;
 
 use BeeTree\ModelInterface;
-use BeeTree\NodeInterface;
+use BeeTree\NodeInterface as Node;
 use BeeTree\Helper;
 use Illuminate\Database\Eloquent\Model;
-use \ReflectionClass;
-use \DomainException;
+use ReflectionClass;
+use DomainException;
+use InvalidArgumentException;
 
 class AdjacencyListModel implements ModelInterface{
 
@@ -39,28 +40,40 @@ class AdjacencyListModel implements ModelInterface{
 
     protected $_selectColumns = NULL;
 
-    public function nodeClassName(){
+    /**
+     * @var \Illuminate\Database\Eloquent\Model
+     **/
+    protected $model;
+
+    public function nodeClassName()
+    {
         return $this->_nodeClassName;
     }
 
-    public function setNodeClassName($className){
+    public function setNodeClassName($className)
+    {
+        return $this->setModel(new $className);
+    }
 
-        $refl = new ReflectionClass($className);
+    /**
+     * @return \Illuminate\Database\Eloquent\Model
+     **/
+    public function getModel()
+    {
+        return $this->model;
+    }
 
-        if(!$refl->implementsInterface('\BeeTree\NodeInterface')){
-            throw new DomainException("$className has to implement NodeInterface");
-        }
-
-        if(!$refl->isSubclassOf('\Illuminate\Database\Eloquent\Model')){
-            throw new DomainException("$className has to be subclass of Illuminate\Database\Eloquent\Model");
-        }
-
-        $this->_nodeClassName = $className;
-
-        $this->_nodePrototype = $refl->newInstance();
-
-        $this->_nodeClassReflection = $refl;
-
+    /**
+     * @param \Illuminate\Database\Eloquent\Model $model
+     * @return self
+     **/
+    public function setModel(Model $model)
+    {
+        $this->checkInterface($model);
+        $this->model = $model;
+        $this->_nodeClassName = get_class($model);
+        $this->_nodePrototype = $this->model;
+        $this->_nodeClassReflection = new ReflectionClass($this->model);
         return $this;
     }
 
@@ -76,20 +89,22 @@ class AdjacencyListModel implements ModelInterface{
         return $this;
     }
 
-    public function get($identifier, $rootId=NULL){
+    public function get($identifier, $rootId=NULL)
+    {
 
-        if(!isset($this->_idLookup[$identifier])){
-
-            if($rootId){
-                $tree = $this->tree($rootId);
-            }
-            else{
-                $result = $this->getHierarchyByIdQuery($identifier)->get($this->getSelectColumns());
-                $this->fillNodeCache($result);
-                Helper::toHierarchy($result);
-            }
-
+        if (isset($this->_idLookup[$identifier])) {
+            return $this->_idLookup[$identifier];
         }
+
+        if($rootId){
+            $tree = $this->tree($rootId);
+        }
+        else{
+            $result = $this->getHierarchyByIdQuery($identifier)->get($this->getSelectColumns());
+            $this->fillNodeCache($result);
+            Helper::toHierarchy($result);
+        }
+
         return $this->_idLookup[$identifier];
     }
 
@@ -102,19 +117,18 @@ class AdjacencyListModel implements ModelInterface{
         return $this->getRootNodesQuery()->get()->all();
     }
 
-    public function makeNode(){
-        $node = $this->_nodeClassReflection->newInstance();
-        foreach($this->_constraints as $key=>$value){
-            $node->__set($key, $value);
-        }
+    public function makeNode()
+    {
+        $node = $this->model->newInstance();
+        $node->forceFill($this->_constraints);
         return $node;
     }
 
-    public function saveNode(NodeInterface $node){
+    public function saveNode(Node $node){
         $node->save();
     }
 
-    public function makeRootNode(NodeInterface $node){
+    public function makeRootNode(Node $node){
 
         $node->__set($this->parentCol(), NULL);
 
@@ -140,7 +154,7 @@ class AdjacencyListModel implements ModelInterface{
         return $this;
     }
 
-    public function makeChildOf(NodeInterface $node, NodeInterface $newParent){
+    public function makeChildOf(Node $node, Node $newParent){
 
         // The node is already a child of newParent
         if( ($node->__get($this->parentCol()) == $newParent->__get($this->pkCol())) &&
@@ -164,7 +178,7 @@ class AdjacencyListModel implements ModelInterface{
         return $this;
     }
 
-    public function delete(NodeInterface $node, $deleteChildNodes = TRUE){
+    public function delete(Node $node, $deleteChildNodes = TRUE){
 
         if(!$deleteChildNodes){
             throw new DomainException('Non-recursive delete is not supported right now');
@@ -205,7 +219,8 @@ class AdjacencyListModel implements ModelInterface{
 
         if(!isset($this->_rootNodeCache[$rootId])){
 
-            $result = $this->getHierarchyByRootIdQuery($rootId)->get($this->getSelectColumns());
+            $result = $this->getHierarchyByRootIdQuery($rootId)
+                           ->get($this->getSelectColumns());
 
             $this->fillNodeCache($result);
 
@@ -354,5 +369,12 @@ class AdjacencyListModel implements ModelInterface{
 
     public function pkCol(){
         return $this->_nodePrototype->getKeyName();
+    }
+
+    protected function checkInterface(Model $model)
+    {
+        if (!$model instanceof Node) {
+            throw new InvalidArgumentException(get_class($model).' has to implement BeeTree\NodeInterface');
+        }
     }
 }
