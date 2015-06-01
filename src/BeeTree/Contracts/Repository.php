@@ -7,9 +7,10 @@ interface Repository
      * Retrieve a tree by its rootId
      * 
      * @param mixed $rootId The id of its root node, which is the same as node->getRootId()
+     * @param array $columns (Optional) Determine which columns have to be fetched from persistence
      * @return \BeeTree\NodeInterface
      **/
-    public function tree($rootId=NULL);
+    public function tree($rootId=NULL, array $columns=[]);
 
     /**
      * Retrieve a tree by its ID
@@ -19,6 +20,14 @@ interface Repository
      * @return \BeeTree\Contracts\Node
      **/
     public function get($id, $rootId=NULL);
+
+    /**
+     * Return all children of $node
+     *
+     * @param \BeeTree\Contracts\Node $node
+     * @return \Traversable
+     **/
+    public function childrenOf(Node $node);
 
     /**
      * Retrieve all root nodes
@@ -36,12 +45,12 @@ interface Repository
     public function make(array $attributes=[]);
 
     /**
-     * Save a node
+     * Persist the payload of a node, actually saving it
      *
      * @param \BeeTree\Contracts\Node $node The node you want to save
      * @return self
      **/
-    public function save(Node $node);
+    public function persist(Node $node);
 
     /**
      * Make a root node (and save it)
@@ -49,7 +58,7 @@ interface Repository
      * @param array $attributes
      * @return \BeeTree\Contracts\Node
      **/
-    public function createRoot(array $attributes);
+    public function create(array $attributes);
 
     /**
      * Make node $node a child of $newParent If this is an ordered tree,
@@ -67,6 +76,6 @@ interface Repository
      * @param \BeeTree\Contracts\Node $node
      * @return self
      **/
-    public function delete(Node $node);
+    public function remove(Node $node);
 
 }

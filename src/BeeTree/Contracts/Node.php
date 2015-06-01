@@ -18,40 +18,47 @@ interface Node
     public function parent();
 
     /**
-    * Set the parent node of this node
+    * Set the parent node of this node (Only in memory)
     * 
-    * @param \BeeTree\Contracts\Node $parent
+    * @param self $parent
     * @return self
     */
-    public function setParent(Node $parent);
+    public function setParent(self $parent);
+
+    /**
+     * Clear the parent, which makes the node a root node
+     *
+     * @return self
+     **/
+    public function clearParent();
 
     /**
     * Returns the childs of this node
     * 
-    * @return array [\BeeTree\Contracts\Node]
+    * @return \BeeTree\Contracts\Children
     */
     public function children();
 
     /**
-    * Clears all childNodes
+    * Clears all childNodes. (Only in memory)
     * 
     * @return self
     */
     public function clearChildren();
 
     /**
-    * Adds a childNode to this node
+    * Adds a childNode to this node (Only in memory)
     * 
     * @return self
     */
-    public function addChild(Node $child);
+    public function addChild(self $child);
 
     /**
-    * Removes a child node
+    * Removes a child node (Only in memory)
     * 
     * @return self
     */
-    public function removeChild(Node $child);
+    public function removeChild(self $child);
 
     /**
     * Does this node have children?
@@ -68,19 +75,19 @@ interface Node
     public function hasParent();
 
     /**
-    * Returns the depth of this node
+    * Returns the level of this node
     * 
     * @return int
     */
-    public function getDepth();
+    public function getLevel();
 
     /**
-    * Set the depth of this node (usually done by BeeTreeModel)
+    * Set the levek of this node (usually done by BeeTreeModel)
     *
-    * @param int $depth
+    * @param int $level
     * @return self
     */
-    public function setDepth($depth);
+    public function setLevel($level);
 
     /**
     * Returns the identifier of this node
@@ -93,10 +100,4 @@ interface Node
     */
     public function getId();
 
-    /**
-    * @brief Returns the identifier of the parent
-    * 
-    * @return mixed
-    */
-    public function getParentId();
 }
