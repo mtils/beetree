@@ -5,23 +5,23 @@ interface SortableRepository extends Repository
 {
 
     /**
-     * Insert $moved after $newAncestor. The parents of both nodes are the same
-     * after this operation
+     * Create a node with $attributes in $parent at $position
      *
-     * @param \BeeTree\Contracts\Sortable $movedNode
-     * @param \BeeTree\Contracts\Sortable $newAncestor
-     * @return self
+     * @param array $attributes
+     * @param \BeeTree\Contracts\Sortable
+     * @param int $position
+     * @return self The created sortable
      **/
-    public function insertAfter(Sortable $movedNode, Sortable $newAncestor);
+    public function createAt(array $attributes, Sortable $parent, $position);
 
     /**
-     * Insert $moved before $newAncestor. The parents of both nodes are the same
-     * after this operation.
+     * Move the $movedNode inside $newParent to position $position
      *
      * @param \BeeTree\Contracts\Sortable $movedNode
-     * @param \BeeTree\Contracts\Sortable $newAncestor
+     * @param \BeeTree\Contracts\Sortable $newParent
+     * @param int $position
      * @return self
      **/
-    public function insertBefore(Sortable $movedNode, Sortable $newDescendant);
+    public function placeAt(Sortable $movedNode, Sortable $newParent, $position);
 
 }

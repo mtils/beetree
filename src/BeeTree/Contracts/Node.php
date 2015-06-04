@@ -15,7 +15,7 @@ interface Node
     * 
     * @return \BeeTree\Contracts\Node
     */
-    public function parent();
+    public function getParent();
 
     /**
     * Set the parent node of this node (Only in memory)
@@ -37,7 +37,7 @@ interface Node
     * 
     * @return \BeeTree\Contracts\Children
     */
-    public function children();
+    public function getChildren();
 
     /**
     * Clears all childNodes. (Only in memory)
@@ -99,5 +99,12 @@ interface Node
     * @return mixed
     */
     public function getId();
+
+    /**
+     * This is needed to hydrate the trees
+     *
+     * @return mixed
+     **/
+    public function getParentId();
 
 }

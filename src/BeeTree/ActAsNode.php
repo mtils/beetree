@@ -38,7 +38,7 @@ trait ActAsNode
     * 
     * @return \BeeTree\Contracts\Node
     */
-    public function parent()
+    public function getParent()
     {
         return $this->_parent;
     }
@@ -71,7 +71,7 @@ trait ActAsNode
     * 
     * @return \BeeTree\Contracts\Children
     */
-    public function children()
+    public function getChildren()
     {
         if ($this->_children === null) {
             $this->_children = $this->makeChildren();
@@ -86,7 +86,7 @@ trait ActAsNode
     */
     public function clearChildren()
     {
-        $this->children()->clear();
+        $this->getChildren()->clear();
         return $this;
     }
 
@@ -97,7 +97,7 @@ trait ActAsNode
     */
     public function addChild(self $child)
     {
-        $this->children()->append($child);
+        $this->getChildren()->append($child);
         return $this;
     }
 
@@ -108,7 +108,7 @@ trait ActAsNode
     */
     public function removeChild(self $child)
     {
-        $this->children()->remove($child);
+        $this->getChildren()->remove($child);
         return $this;
     }
 
@@ -119,7 +119,7 @@ trait ActAsNode
     */
     public function hasChildren()
     {
-        return (bool)$this->children()->count();
+        return (bool)$this->getChildren()->count();
     }
 
     /**
