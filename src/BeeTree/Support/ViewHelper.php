@@ -22,7 +22,7 @@ class ViewHelper
         $string .= "\n    <ul>";
 
         foreach ($node->getChildren() as $child) {
-            $this->toLi($child, $liCreator, $string);
+            $this->toUnorderedList($child, $liCreator, $string);
         }
 
         $string .= "\n    </ul>";
