@@ -21,7 +21,6 @@ class Sorter
             }
 
             if ($parentId && isset($nodesById[$parentId])) {
-                $nodesById[$parentId]->addChild($node);
                 $node->setParent($nodesById[$parentId]);
             }
 
@@ -106,7 +105,7 @@ class Sorter
         });
     }
 
-    public function __callStatic($method, array $params=[])
+    public static function __callStatic($method, array $params=[])
     {
         return call_user_func_array([new static, $method], $params);
     }

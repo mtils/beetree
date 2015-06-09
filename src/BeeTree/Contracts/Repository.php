@@ -47,6 +47,15 @@ interface Repository
     public function make(array $attributes=[]);
 
     /**
+     * Construct a node (new $NodeClass()) (Doesn't save the node)
+     * 
+     * @param array $attributes (optional)
+     * @param \BeeTree\Contracts\Node $parent
+     * @return \BeeTree\Contracts\Node
+     **/
+    public function makeChild(array $attributes=[], Node $parent);
+
+    /**
      * Persist the payload of a node, actually saving it
      *
      * @param \BeeTree\Contracts\Node $node The node you want to save

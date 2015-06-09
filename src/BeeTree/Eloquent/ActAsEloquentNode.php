@@ -48,6 +48,7 @@ trait ActAsEloquentNode
     public function setParent(Node $parent)
     {
         $this->relations['parent'] = $parent;
+        $parent->addChild($this);
         return $this;
     }
 

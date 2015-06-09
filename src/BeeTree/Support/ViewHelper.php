@@ -5,7 +5,17 @@ use BeeTree\Contracts\Node;
 class ViewHelper
 {
 
-    public function toUnorderedList(NodeInterface $node, callable $liCreator,  &$string=NULL)
+    public function root(Node $node)
+    {
+        while ($parent = $node->getParent()) {
+            $node = $parent;
+            if($parent->isRoot()){
+                return $parent;
+            }
+        }
+    }
+
+    public function toUnorderedList(Node $node, callable $liCreator, &$string=NULL)
     {
 
         if ($string === NULL) {

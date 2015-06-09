@@ -21,7 +21,7 @@ trait WholeOrderedTreeModelTrait
     public function createChildOf(array $attributes, Node $parent)
     {
         // Get new position
-        $position = $this->getLastChildPosition($newParent);
+        $position = $this->getLastChildPosition($parent);
         $attributes[$this->getPositionName()] = $position;
 
         $model = $this->performCreateChildOf($attributes, $parent);
@@ -148,7 +148,7 @@ trait WholeOrderedTreeModelTrait
 
     }
 
-    protected function getLastChildPosition(NodeInterface $parent){
+    protected function getLastChildPosition(Node $parent){
 
         $parentIdName = $this->getParentIdName();
         $query = $this->newQuery();
@@ -182,5 +182,17 @@ trait WholeOrderedTreeModelTrait
               ->where($this->getPositionName(), '>', $position)
               ->increment($this->getPositionName());
 
+    }
+
+    public function queryTree($rootId)
+    {
+        return $this->getTreeQuery($rootId)
+                    ->orderBy($this->getTable().'.'.$this->getPositionName());
+    }
+
+    public function queryTreeById($id)
+    {
+        return $this->getTreeByIdQuery($id)
+                    ->orderBy($this->getTable().'.'.$this->getPositionName());
     }
 }

@@ -73,8 +73,7 @@ trait WholeTreeModelTrait
         $result = $this->queryTreeById($id)
                        ->get($this->toSelectColumns($columns));
 
-        $this->fillNodeCache($result);
-        $this->sorter()->toHierarchy($result);
+        $this->fillNodeCache($columnsId, $result);
 
         return $this->_hierachyCache[$columnsId][$id];
 
@@ -115,6 +114,25 @@ trait WholeTreeModelTrait
     }
 
     /**
+     * Construct a node (new $NodeClass()) (Doesn't save the node)
+     * 
+     * @param array $attributes (optional)
+     * @param \BeeTree\Contracts\Node $parent
+     * @return \BeeTree\Contracts\Node
+     **/
+    public function makeChild(array $attributes=[], Node $parent)
+    {
+        $child = $this->make($attributes);
+
+        $child[$this->getParentIdName()] = $parent->getId();
+        $child[$this->getRootIdName()] = $parent[$this->getRootIdName()];
+
+        $child->setParent($parent);
+
+        return $child;
+    }
+
+    /**
      * Persist the payload of a node, actually saving it
      *
      * @param \BeeTree\Contracts\Node $node The node you want to save
@@ -135,7 +153,15 @@ trait WholeTreeModelTrait
     public function createRoot(array $attributes)
     {
         $attributes[$this->getParentIdName()] = null;
-        return parent::create($attributes);
+        $root = parent::create($attributes);
+
+        if (!$root[$this->getRootIdName()]) {
+            $root[$this->getRootIdName()] = $root->getId();
+            $root->save();
+        }
+
+        return $root;
+
     }
 
     /**
@@ -323,9 +349,9 @@ trait WholeTreeModelTrait
     {
         $table = $this->getTable();
 
-        return array_map($columns, function($column) use ($table) {
+        return array_map(function($column) use ($table) {
             return "$table.$column";
-        });
+        }, $columns);
 
     }
 
