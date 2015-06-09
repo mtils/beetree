@@ -73,7 +73,10 @@ trait ActAsEloquentNode
         if (isset($this->relations['children'])) {
             return $this->relations['children'];
         }
-        return $this->getAttribute('children');
+
+        $children = $this->getAttribute('children');
+
+        return $children === null ? [] : $children;
     }
 
     /**
@@ -149,6 +152,27 @@ trait ActAsEloquentNode
     */
     public function getLevel()
     {
+        if ($this->_level !== null) {
+            return $this->_level;
+        }
+
+        if ($this->isRoot()) {
+            $this->_level = -1;
+            return $this->_level;
+        }
+
+        $parents = array($this);
+        $node = $this;
+
+        while ($parent = $node->getParent()){
+            if (!$parent->isRoot()) {
+                $parents[] = $parent;
+            }
+            $node = $parent;
+        }
+
+        $this->_level = count($parents);
+
         return $this->_level;
     }
 

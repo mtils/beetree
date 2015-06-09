@@ -56,18 +56,18 @@ trait WholeTreeModelTrait
         $columns = $this->pickColumns($columns);
         $columnsId = $this->getColumnsCacheId($columns);
 
-        if (isset($this->_hierachyCache[$columnsId][$rootId])) {
-            return $this->_hierachyCache[$columnsId][$rootId];
+        if (isset($this->_hierachyCache[$columnsId][$id])) {
+            return $this->_hierachyCache[$columnsId][$id];
         }
 
-        // If we have a root id, try to fetch the whole tree
+        // If we have a root id, fill the cache by fetching the whole tree
         if ($rootId) {
-            $tree = $this->tree($rootId, $columns);
+            $this->tree($rootId, $columns);
         }
 
         // After retrieving the tree, look if it is now in cache
-        if (isset($this->_hierachyCache[$columnsId][$rootId])) {
-            return $this->_hierachyCache[$columnsId][$rootId];
+        if (isset($this->_hierachyCache[$columnsId][$id])) {
+            return $this->_hierachyCache[$columnsId][$id];
         }
 
         $result = $this->queryTreeById($id)
@@ -75,7 +75,9 @@ trait WholeTreeModelTrait
 
         $this->fillNodeCache($columnsId, $result);
 
-        return $this->_hierachyCache[$columnsId][$id];
+        if (isset($this->_hierachyCache[$columnsId][$id])) {
+            return $this->_hierachyCache[$columnsId][$id];
+        }
 
     }
 
@@ -284,7 +286,7 @@ trait WholeTreeModelTrait
     protected function performRemove(Node $node)
     {
         $subtree = $this->get(
-            $node->getParentId(),
+            $node->getId(),
             $node[$this->getRootIdName()]
         );
 

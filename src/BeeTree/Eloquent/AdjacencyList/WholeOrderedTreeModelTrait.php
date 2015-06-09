@@ -166,6 +166,10 @@ trait WholeOrderedTreeModelTrait
 
     protected function decrementOrderAfter($parentId, $position){
 
+        if ($position === null) {
+            return;
+        }
+
         $query = $this->newQuery();
 
         $query->where($this->getParentIdName(), $parentId)
@@ -175,6 +179,10 @@ trait WholeOrderedTreeModelTrait
     }
 
     protected function incrementOrderAfter($parentId, $position){
+
+        if ($position === null) {
+            return;
+        }
 
         $query = $this->newQuery();
 

@@ -2,6 +2,7 @@
 
 
 use OutOfBoundsException;
+use BeeTree\Contracts\Node;
 
 class Sorter
 {
@@ -33,13 +34,17 @@ class Sorter
         return $root;
     }
 
-    public function flatify(NodeInterface $node, &$flatArray=NULL){
+    public function flatify(Node $node, &$flatArray=NULL){
 
         if($flatArray === NULL){
             $flatArray = [];
         }
 
         $flatArray[] = $node;
+
+        if (!$node->hasChildren()) {
+            return $flatArray;
+        }
 
         foreach($node->getChildren() as $child){
             $this->flatify($child, $flatArray);
@@ -50,7 +55,7 @@ class Sorter
 
     public function ids($node)
     {
-        return array_map(self::flatify($node), function($node){
+        return array_map($this->flatify($node), function($node){
             return $node->getId();
         });
     }
@@ -71,7 +76,7 @@ class Sorter
 
         foreach ($iterable as $node) {
 
-            $depth = $node->getDepth();
+            $depth = $node->getLevel();
 
             if (!isset($byDepth[$depth])) {
                 $byDepth[$depth] = [];
