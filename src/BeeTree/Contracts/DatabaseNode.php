@@ -30,4 +30,19 @@ interface DatabaseNode extends Node
      **/
     public function getRootIdName();
 
+    /**
+     * Returns true if the tree was popuplated by its repository
+     *
+     * @return bool
+     **/
+    public function treeIsPopulated();
+
+    /**
+     * Set if the tree of this node was populated by the repository
+     *
+     * @param bool $populated (optional)
+     * @return self
+     **/
+    public function setTreeIsPopulated($populated=true);
+
 }

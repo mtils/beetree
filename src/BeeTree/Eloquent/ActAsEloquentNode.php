@@ -10,6 +10,8 @@ trait ActAsEloquentNode
 
     protected $childrenRelation;
 
+    protected $isTreePopupated = false;
+
     protected $_level;
 
     /**
@@ -239,6 +241,28 @@ trait ActAsEloquentNode
     public function getRootIdName()
     {
         return isset($this->rootIdName) ? $this->rootIdName : 'root_id';
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return bool
+     **/
+    public function treeIsPopulated()
+    {
+        return $this->isTreePopupated;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param bool $populated (optional)
+     * @return self
+     **/
+    public function setTreeIsPopulated($populated=true)
+    {
+        $this->isTreePopupated = $populated;
+        return $this;
     }
 
     protected function hasManyChildren()
