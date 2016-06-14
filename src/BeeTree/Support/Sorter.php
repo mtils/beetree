@@ -3,6 +3,7 @@
 
 use OutOfBoundsException;
 use BeeTree\Contracts\Node;
+use BeeTree\Contracts\DatabaseNode;
 
 class Sorter
 {
@@ -23,6 +24,9 @@ class Sorter
 
             if ($parentId && isset($nodesById[$parentId])) {
                 $node->setParent($nodesById[$parentId]);
+            }
+            if ($node instanceof DatabaseNode) {
+                $node->setTreeIsPopulated(true);
             }
 
         }
