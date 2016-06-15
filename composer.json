@@ -14,7 +14,7 @@
   "require": {
     "php": ">=5.4.0",
     "ems/collection":"0.1.*",
-    "illuminate/database": "5.0.*"
+    "illuminate/database": "5.0.*|5.1.*|5.2.*"
   },
   "autoload": {
     "psr-0": {
