@@ -1,12 +1,12 @@
 <?php namespace BeeTree\Eloquent;
 
-use Eloquent;
+use Illuminate\Database\Eloquent\Model;
 use BeeTree\NodeInterface;
 
-class BeeTreeNode extends Eloquent implements NodeInterface{
+class BeeTreeNode extends Model implements NodeInterface{
 
     protected $_parentNode;
-    
+
     protected $_childNodes = array();
 
     protected $_depth;
@@ -17,7 +17,7 @@ class BeeTreeNode extends Eloquent implements NodeInterface{
 
     /**
     * @brief Returns if node is a root node
-    * 
+    *
     * @return void
     */
     public function isRootNode(){
@@ -29,7 +29,7 @@ class BeeTreeNode extends Eloquent implements NodeInterface{
 
     /**
     * @brief Returns the parent node of this node
-    * 
+    *
     * @return NodeInterface
     */
     public function parentNode(){
@@ -38,7 +38,7 @@ class BeeTreeNode extends Eloquent implements NodeInterface{
 
     /**
     * @brief Returns the parent node of this node
-    * 
+    *
     * @return NodeInterface
     */
     public function setParentNode(NodeInterface $parent){
@@ -48,7 +48,7 @@ class BeeTreeNode extends Eloquent implements NodeInterface{
 
     /**
     * @brief Returns the childs of this node
-    * 
+    *
     * @return array [NodeInterface]
     */
     public function childNodes(){
@@ -57,7 +57,7 @@ class BeeTreeNode extends Eloquent implements NodeInterface{
 
     /**
     * @brief Clears all childNodes
-    * 
+    *
     * @return array [NodeInterface]
     */
     public function clearChildNodes(){
@@ -67,7 +67,7 @@ class BeeTreeNode extends Eloquent implements NodeInterface{
 
     /**
     * @brief Adds a childNode to this node
-    * 
+    *
     * @return NodeInterface
     */
     public function addChildNode(NodeInterface $childNode){
@@ -77,7 +77,7 @@ class BeeTreeNode extends Eloquent implements NodeInterface{
 
     /**
     * @brief Removes a child node
-    * 
+    *
     * @return NodeInterface
     */
     public function removeChildNode(NodeInterface $childNode){
@@ -99,7 +99,7 @@ class BeeTreeNode extends Eloquent implements NodeInterface{
 
     /**
     * @brief Does this node have children?
-    * 
+    *
     * @return bool
     */
     public function hasChildNodes(){
@@ -108,7 +108,7 @@ class BeeTreeNode extends Eloquent implements NodeInterface{
 
     /**
     * @brief Does this node has a parent?
-    * 
+    *
     * @return bool
     */
     public function hasParentNode(){
@@ -120,7 +120,7 @@ class BeeTreeNode extends Eloquent implements NodeInterface{
 
     /**
     * @brief Returns the depth of this node
-    * 
+    *
     * @return int
     */
     public function getDepth(){
@@ -163,7 +163,7 @@ class BeeTreeNode extends Eloquent implements NodeInterface{
     *        child depends to which parent.
     *        In a filesystem the path would be the identifier, in
     *        a database a id column.
-    * 
+    *
     * @return mixed
     */
     public function getIdentifier(){
@@ -172,7 +172,7 @@ class BeeTreeNode extends Eloquent implements NodeInterface{
 
     /**
     * @brief Returns the identifier of the parent
-    * 
+    *
     * @return mixed
     */
     public function getParentIdentifier(){

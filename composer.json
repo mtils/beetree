@@ -8,18 +8,25 @@
     {
       "name": "Michael Tils",
       "email": "mtils@web-utils.de",
-      "homepage": "http://web-utils.de"
+      "homepage": "https://web-utils.de"
     }
   ],
   "require": {
-    "php": ">=5.4.0",
-    "ems/collection":"0.2.*",
-    "illuminate/database": "5.0.*|5.1.*|5.2.*|5.3.*|5.4.*|5.5.*"
+    "php": ">=8.2.0",
+    "ems/collection":"0.3.*",
+    "illuminate/database": "11.*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "11.1.2"
   },
   "autoload": {
-    "psr-0": {
-      "BeeTree": "src/"
+    "psr-4": {
+      "BeeTree\\": "src/BeeTree"
     }
   },
-  "minimum-stability": "dev"
+  "autoload-dev": {
+    "psr-4": {
+      "BeeTree\\Test\\": "tests/unit"
+    }
+  }
 }

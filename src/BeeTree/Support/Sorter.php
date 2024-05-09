@@ -59,9 +59,9 @@ class Sorter
 
     public function ids($node)
     {
-        return array_map($this->flatify($node), function($node){
+        return array_map(function($node){
             return $node->getId();
-        });
+        }, $this->flatify($node));
     }
 
     public function byId($iterable)

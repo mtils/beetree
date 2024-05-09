@@ -8,17 +8,19 @@ use \ReflectionClass;
 use \DomainException;
 use DB;
 
+use function get_class;
+
 class OrderedAdjacencyListModel extends AdjacencyListModel implements ModelInterface{
 
     protected $_sortCol;
 
     public function insertAfter(NodeInterface $movedNode,
-                                NodeInterface $newAncestor){
+                                NodeInterface $newAncestor) {
 
     }
 
     public function insertBefore(NodeInterface $movedNode,
-                                 NodeInterface $newDescendant){
+                                 NodeInterface $newDescendant) {
         // 1. movedNode.parentId = newDescendant.parentId, movedNode.position = MAX(newDescendant.position,1)
         // 2. removeFromSort(movedNode) like delete without delete
         // 2. UPDATE SET position = position+1 WHERE parentId = newAncestor.parentId
@@ -31,7 +33,7 @@ class OrderedAdjacencyListModel extends AdjacencyListModel implements ModelInter
         $oldPosition = $movedNode->__get($this->sortCol());
 
         // Nothing to do
-        if($targetParentId == $oldParentId && $targetPosition == $oldPosition && $node->exists){
+        if($targetParentId == $oldParentId && $targetPosition == $oldPosition && $movedNode->exists){
             return $this;
         }
 
@@ -71,7 +73,8 @@ class OrderedAdjacencyListModel extends AdjacencyListModel implements ModelInter
         return $this;
     }
 
-    public function delete(NodeInterface $node, $deleteChildNodes = TRUE){
+    public function delete(NodeInterface $node, $deleteChildNodes = true)
+    {
 
         // Collect the parentId to correct the positions of its old ancestors
         $parentId = $node->__get($this->parentCol());
@@ -86,15 +89,12 @@ class OrderedAdjacencyListModel extends AdjacencyListModel implements ModelInter
         return $this;
     }
 
-    protected function getLastChildPosition(NodeInterface $node, NodeInterface $newParent){
+    protected function getLastChildPosition(NodeInterface $node, NodeInterface $newParent)
+    {
 
-        $method = array($this->_nodeClassName, 'where');
-        $pos = call_user_func(
-            $method,
-            $this->parentCol(),
-            '=',
-            $newParent->__get($this->pkCol())
-        )->max($this->sortCol());
+        $pos = $this->getModel()->newQuery()
+            ->where($this->parentCol(), '=', $newParent->__get($this->pkCol()))
+            ->max($this->sortCol());
 
         if(is_numeric($pos) && $pos){
             return (int)$pos+1;
@@ -103,7 +103,8 @@ class OrderedAdjacencyListModel extends AdjacencyListModel implements ModelInter
         return 1;
     }
 
-    protected function getHierarchyByRootIdQuery($id){
+    protected function getHierarchyByRootIdQuery($id)
+    {
         return parent::getHierarchyByRootIdQuery($id)->orderBy($this->nodeTable().'.'.$this->sortCol());
     }
 
@@ -111,32 +112,37 @@ class OrderedAdjacencyListModel extends AdjacencyListModel implements ModelInter
         return parent::getHierarchyByIdQuery($id)->orderBy($this->nodeTable().'.'.$this->sortCol());
     }
 
-    protected function incrementOrderAfter($parentId, $position){
-
-        DB::table($this->nodeTable())
+    protected function incrementOrderAfter($parentId, $position)
+    {
+        $connection = $this->getModel()->getConnection();
+        $connection->table($this->nodeTable())
             ->where($this->parentCol(),'=',$parentId)
             ->where($this->sortCol(),'>',$position)
             ->increment($this->sortCol());
 
     }
 
-    protected function decrementOrderAfter($parentId, $position){
-
-        DB::table($this->nodeTable())
+    protected function decrementOrderAfter($parentId, $position)
+    {
+        $connection = $this->getModel()->getConnection();
+        $connection->table($this->nodeTable())
             ->where($this->parentCol(),'=',$parentId)
             ->where($this->sortCol(),'>',$position)
             ->decrement($this->sortCol());
 
     }
 
-    public function sortCol(){
-        if($this->_sortCol === NULL){
-            $properties = $this->_nodeClassReflection->getDefaultProperties();
-            if(!isset($properties['sortColumn'])){
-                throw new DomainException("$className has to have a property named 'sortColumn' which returns the sort column name");
-            }
-            $this->_sortCol = $properties['sortColumn'];
+    public function sortCol()
+    {
+        if (!$this->_sortCol !== null) {
+            return $this->_sortCol;
         }
+        $properties = $this->_nodeClassReflection->getDefaultProperties();
+        if(!isset($properties['sortColumn'])){
+            $className = get_class($this);
+            throw new DomainException("$className has to have a property named 'sortColumn' which returns the sort column name");
+        }
+        $this->_sortCol = $properties['sortColumn'];
         return $this->_sortCol;
     }
 }

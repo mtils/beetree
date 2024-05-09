@@ -1,12 +1,16 @@
 <?php namespace BeeTree\Eloquent;
 
 use BeeTree\ModelInterface;
+use BeeTree\NodeInterface;
 use BeeTree\NodeInterface as Node;
 use BeeTree\Helper;
 use Illuminate\Database\Eloquent\Model;
 use ReflectionClass;
 use DomainException;
 use InvalidArgumentException;
+
+use function class_exists;
+use function get_class;
 
 class AdjacencyListModel implements ModelInterface{
 
@@ -32,16 +36,16 @@ class AdjacencyListModel implements ModelInterface{
 
     protected $_rootCol;
 
-    protected $_idLookup = array();
+    protected $_idLookup = [];
 
-    protected $_rootNodeCache = array();
+    protected $_rootNodeCache = [];
 
-    protected $_constraints = array();
+    protected $_constraints = [];
 
-    protected $_selectColumns = NULL;
+    protected $_selectColumns = null;
 
     /**
-     * @var \Illuminate\Database\Eloquent\Model
+     * @var Model
      **/
     protected $model;
 
@@ -52,11 +56,15 @@ class AdjacencyListModel implements ModelInterface{
 
     public function setNodeClassName($className)
     {
-        return $this->setModel(new $className);
+        if (!class_exists($className)) {
+            throw new InvalidArgumentException("Class $className does not exist");
+        }
+        $model = new $className();
+        return $this->setModel($model);
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Model
+     * @return Model
      **/
     public function getModel()
     {
@@ -64,7 +72,7 @@ class AdjacencyListModel implements ModelInterface{
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model $model
+     * @param Model $model
      * @return self
      **/
     public function setModel(Model $model)
@@ -82,8 +90,8 @@ class AdjacencyListModel implements ModelInterface{
     }
 
     public function setConstraints($constraints){
-        $this->_constraints = array();
-        foreach($_constraints as $column=>$value){
+        $this->_constraints = [];
+        foreach($constraints as $column=>$value){
             $this->_constraints[$column] = $value;
         }
         return $this;
@@ -208,7 +216,7 @@ class AdjacencyListModel implements ModelInterface{
 
     /**
      * @brief Retrieve a tree by its rootId
-     * 
+     *
      * @param mixed $rootId The id of its root node, which is the same as node->getRootId()
      * @return NodeInterface
      **/
@@ -249,6 +257,7 @@ class AdjacencyListModel implements ModelInterface{
         if($this->_parentCol === NULL){
             $properties = $this->_nodeClassReflection->getDefaultProperties();
             if(!isset($properties['parentIdColumn'])){
+                $className = get_class($this);
                 throw new DomainException("$className has to have a property named 'parentIdColumn' which returns the parent_id column name");
             }
             $this->_parentCol = $properties['parentIdColumn'];
@@ -260,6 +269,7 @@ class AdjacencyListModel implements ModelInterface{
         if($this->_rootCol === NULL){
             $properties = $this->_nodeClassReflection->getDefaultProperties();
             if(!isset($properties['rootIdColumn'])){
+                $className = get_class($this);
                 throw new DomainException("$className has to have a property named 'rootIdColumn' which returns the root_id column name");
             }
             $this->_rootCol = $properties['rootIdColumn'];
@@ -267,26 +277,25 @@ class AdjacencyListModel implements ModelInterface{
         return $this->_rootCol;
     }
 
-    protected function getRootNodesQuery(){
+    protected function getRootNodesQuery()
+    {
 
         $table = $this->nodeTable();
         $rootCol = $this->rootCol();
 
-        if(!$this->_constraints){
-            $query = call_user_func(array($this->_nodeClassName, 'orderBy'), "$table.$rootCol");
-        }
-        else{
-            $method = array($this->_nodeClassName, 'whereNested');
-            $constraints = $this->_constraints;
-            $where = call_user_func($method, function($query) use ($constraints){
-                foreach($constraints as $column=>$value){
-                    $query->where($column,'=',$value);
+        $query = $this->model->newQuery();
+
+        if($this->_constraints) {
+            $query->whereNested(function($query) {
+                foreach ($this->_constraints as $column => $value) {
+                    $query->where($column, '=', $value);
                 }
             });
-            $query = $where->orderBy("$table.$rootCol");
         }
 
-        $query = $query->whereNull($this->parentCol());
+        $query->orderBy("$table.$rootCol");
+
+        $query->whereNull($this->parentCol());
 
         return $query;
 
@@ -295,70 +304,70 @@ class AdjacencyListModel implements ModelInterface{
     protected function getHierarchyByRootIdQuery($rootId){
 
         $table = $this->nodeTable();
-        $tableAlias = $this->nodeTable().'_join';
-        $rootCol = $this->rootCol();
+        $query = $this->model->newQuery();
 
-        if(!$this->_constraints){
-            $query = call_user_func(array($this->_nodeClassName, 'orderBy'), "$table.".$this->parentCol());
-        }
-        else{
-            $method = array($this->_nodeClassName, 'whereNested');
-            $constraints = $this->_constraints;
-            $where = call_user_func($method, function($query) use ($constraints){
-                foreach($constraints as $column=>$value){
+        if($this->_constraints){
+            $query->whereNested(function($query) {
+                foreach($this->_constraints as $column=>$value){
                     $query->where($column,'=',$value);
                 }
             });
-            $query = $where->orderBy($this->parentCol());
         }
 
-        $query = $query->where($this->rootCol(), $rootId);
+        $query->orderBy("$table.".$this->parentCol());
+
+        $query->where($this->rootCol(), $rootId);
 
         return $query;
     }
 
-    protected function getHierarchyByIdQuery($id){
+    protected function getHierarchyByIdQuery($id)
+    {
         $table = $this->nodeTable();
         $tableAlias = $this->nodeTable().'_join';
         $rootCol = $this->rootCol();
 
-        if(!$this->_constraints){
-            $query = call_user_func(array($this->_nodeClassName, 'orderBy'), "$table.".$this->parentCol());
-        }
-        else{
-            $method = array($this->_nodeClassName, 'whereNested');
-            $constraints = $this->_constraints;
-            $where = call_user_func($method, function($query) use ($constraints){
-                foreach($constraints as $column=>$value){
+        $query = $this->model->newQuery();
+
+
+        if ($this->_constraints) {
+            $query->whereNested(function($query) {
+                foreach($this->_constraints as $column=>$value){
                     $query->where($column,'=',$value);
                 }
             });
-            $query = $where->orderBy("$table.".$this->parentCol());
         }
 
         $query = $query->join("$table as $tableAlias", "$table.$rootCol",'=',"$tableAlias.$rootCol");
-
         $query = $query->where("$tableAlias.".$this->pkCol(), $id);
+        $query->orderBy("$table.".$this->parentCol());
 
         return $query;
     }
 
-    protected function getSelectColumns(){
+    /**
+     * @return string[]
+     */
+    protected function getSelectColumns()
+    {
 
-        if($this->_selectColumns === NULL){
-            $properties = $this->_nodeClassReflection->getDefaultProperties();
-            if(isset($properties['wholeTreeColumns'])){
-                $columns = array();
-                $table = $this->nodeTable();
-                foreach($properties['wholeTreeColumns'] as $columnName){
-                    $columns[] = "$table.$columnName";
-                }
-                $this->_selectColumns = $columns;
-            }
-            else{
-                $this->_selectColumns = array($this->nodeTable() . '.*');
-            }
+        if($this->_selectColumns !== null) {
+            return $this->_selectColumns;
         }
+
+        $properties = $this->_nodeClassReflection->getDefaultProperties();
+
+        if (!isset($properties['wholeTreeColumns'])) {
+            $this->_selectColumns = [$this->nodeTable() . '.*'];
+            return $this->_selectColumns;
+        }
+
+        $this->_selectColumns = [];
+        $table = $this->nodeTable();
+        foreach($properties['wholeTreeColumns'] as $columnName){
+            $this->_selectColumns[] = "$table.$columnName";
+        }
+
         return $this->_selectColumns;
 
     }
