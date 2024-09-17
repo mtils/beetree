@@ -134,7 +134,7 @@ class OrderedAdjacencyListModel extends AdjacencyListModel implements ModelInter
 
     public function sortCol()
     {
-        if (!$this->_sortCol !== null) {
+        if ($this->_sortCol !== null) {
             return $this->_sortCol;
         }
         $properties = $this->_nodeClassReflection->getDefaultProperties();
